@@ -1,1 +1,1 @@
-# loot-utils
+lootTable

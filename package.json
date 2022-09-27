@@ -1,0 +1,21 @@
+{
+  "name": "@rbxts/loot-utils",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "main": "src/init.lua",
+  "typings": "src/index.d.ts",
+  "files": [
+    "src/*"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@rbxts/compiler-types": "^1.2.2-types.0",
+    "@rbxts/types": "^1.0.503",
+    "typescript": "^4.3.5"
+  }
+}
