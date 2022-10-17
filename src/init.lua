@@ -1,33 +1,15 @@
-local random = Random.new();
+local random = Random.new()
 
-local runs = 0;
-local maxRuns = random:NextInteger(1, 75);
-
-local function sortedLoot(t)
-   local values = {};
-
-   for k, v in pairs(t) do
-      table.insert(values, { k, v });
-   end
-
-   table.sort(values, function(a, b)
-       return a[2] > b[2];
-   end)
-
-   return values;
-end
-
-function Lerp(a, b, t)
-   return a+(b-a)*t;
-end
+local runs = 0
+local maxRuns = random:NextInteger(1, 75)
 
 function Roll(lootTable)
-   runs += 1;
+   runs += 1
 
-   if count >= max then
-      random = Random.new(os.time() + random:NextInteger(0, 0xFFFFFFFF));
-      maxRuns = random:NextInteger(1, 75);
-      count = 0;
+   if runs >= maxRuns then
+      random = Random.new(os.time() + random:NextInteger(0, 0xFFFFFFFF))
+      maxRuns = random:NextInteger(1, 75)
+      runs = 0
    end
 
    local totalWeight = 0
@@ -35,7 +17,7 @@ function Roll(lootTable)
       totalWeight += weight
    end
 
-   local randomWeight = random:NextNumber(0, totalWeight);
+   local randomWeight = random:NextNumber(0, totalWeight)
    for index, weight in pairs(lootTable) do
       if randomWeight <= weight then
          return index
@@ -45,23 +27,25 @@ function Roll(lootTable)
    end
 end
 
-function AdjustWeights(lootTable, luck)
+function AdjustWeights(lootTable, luck, callback)
    local adjustedWeights = {}
+   local totalWeight = 0
 
-   local sorted = sortedLoot(lootTable)
-   local size = #sorted
-   local mid = math.ceil(size/2)
+   for _, dropChance in pairs(lootTable) do
+      totalWeight += dropChance
+   end
 
-   for index, drop in ipairs(sorted) do
-      local distribution
-      if index <= mid then
-         distribution = Lerp(0.875, 1.15, index/mid)
-      elseif index > mid then
-         distribution = Lerp(1.15, 1.05, index/size)
+   for dropId, dropChance in pairs(lootTable) do
+      if callback then
+         adjustedWeights[dropId] = callback(dropId, dropChance)
+         continue
       end
 
-      local luck = distribution ^ luck
-      adjustedWeights[drop[1]] = drop[2] * luck
+      if dropChance/totalWeight <= 0.05 then
+         adjustedWeights[dropId] = dropChance * luck
+      else
+         adjustedWeights[dropId] = dropChance
+      end
    end
 
    return adjustedWeights
