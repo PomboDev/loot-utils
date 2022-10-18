@@ -36,12 +36,7 @@ function AdjustWeights(lootTable, luck, callback)
    end
 
    for dropId, dropChance in pairs(lootTable) do
-      if callback then
-         adjustedWeights[dropId] = callback(dropId, dropChance)
-         continue
-      end
-
-      if dropChance/totalWeight <= 0.05 then
+      if dropChance/totalWeight <= 0.05 or callback and callback(dropId) then
          adjustedWeights[dropId] = dropChance * luck
       else
          adjustedWeights[dropId] = dropChance
