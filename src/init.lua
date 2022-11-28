@@ -27,7 +27,7 @@ function Roll(lootTable)
    end
 end
 
-function AdjustWeights(lootTable, luck, callback)
+function AdjustWeights(lootTable, luck)
    local adjustedWeights = {}
    local totalWeight = 0
 
@@ -36,7 +36,7 @@ function AdjustWeights(lootTable, luck, callback)
    end
 
    for dropId, dropChance in pairs(lootTable) do
-      if dropChance/totalWeight <= 0.05 or callback and callback(dropId) then
+      if dropChance/totalWeight <= 0.05 then
          adjustedWeights[dropId] = dropChance * luck
       else
          adjustedWeights[dropId] = dropChance
