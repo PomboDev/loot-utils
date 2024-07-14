@@ -3,7 +3,7 @@ local random = Random.new()
 local runs = 0
 local maxRuns = random:NextInteger(1, 75)
 
-function Roll(lootTable)
+local function roll(weightedTable)
    runs += 1
 
    if runs >= maxRuns then
@@ -13,12 +13,12 @@ function Roll(lootTable)
    end
 
    local totalWeight = 0
-   for _, weight in pairs(lootTable) do
+   for _, weight in pairs(weightedTable) do
       totalWeight += weight
    end
 
    local randomWeight = random:NextNumber(0, totalWeight)
-   for index, weight in pairs(lootTable) do
+   for index, weight in pairs(weightedTable) do
       if randomWeight <= weight then
          return index
       else
@@ -27,26 +27,40 @@ function Roll(lootTable)
    end
 end
 
-function AdjustWeights(lootTable, luck)
-   local adjustedWeights = {}
-   local totalWeight = 0
+local function adjustWeights(weightedTable, factor)
+	local totalWeight = 0
+	local orderedWeights = {}
+	local adjustedWeights = {}
 
-   for _, dropChance in pairs(lootTable) do
-      totalWeight += dropChance
-   end
+	for key, weight in pairs(weightedTable) do
+		totalWeight = totalWeight + weight
+		table.insert(orderedWeights, { key = key, weight = weight })
+	end
 
-   for dropId, dropChance in pairs(lootTable) do
-      if dropChance/totalWeight <= 0.05 then
-         adjustedWeights[dropId] = dropChance * luck
-      else
-         adjustedWeights[dropId] = dropChance
-      end
-   end
+	table.sort(orderedWeights, function(a, b)
+		return a.weight > b.weight
+	end)
 
-   return adjustedWeights
+	local adjustedTotalWeight = 0
+	for index, values in ipairs(orderedWeights) do
+		if index == 1 then
+			values.weight = values.weight * factor
+		else
+			values.weight = values.weight * (factor ^ index)
+		end
+		adjustedTotalWeight = adjustedTotalWeight + values.weight
+	end
+
+	local normalizationFactor = totalWeight / adjustedTotalWeight
+
+	for _, values in ipairs(orderedWeights) do
+		adjustedWeights[values.key] = values.weight * normalizationFactor
+	end
+
+	return adjustedWeights
 end
 
 return {
-   Roll = Roll;
-   AdjustWeights = AdjustWeights;
+   roll = roll;
+   adjustWeights = adjustWeights;
 }
